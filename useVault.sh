@@ -1,4 +1,4 @@
-# Fill in the following variables and run the script
+# Fill in the variables in interaction.sh and run the script
 bold=$(tput bold)
 normal=$(tput sgr0)
 
@@ -18,19 +18,21 @@ echo "1 - Propose eGld transfer"
 echo "2 - Propose ESDT transfer"
 echo "3 - Propose quorum change"
 echo "4 - Propose adding a board member"
-echo "5 - Sign transaction"
-echo "6 - Display contract info"
-echo "7 - Display proposal info"
+echo "5 - Propose adding a proposer"
+echo "6 - Sign proposal"
+echo "7 - Unsign proposal"
+echo "7 - Display contract info"
+echo "8 - Display proposal info"
 
 read INPUT
 
 option1() {
     echo "Recipient address:"
     read RECIPIENT
-    echo "Amount to transfer (1 = 1eGld. Input floating numbers as 0.01):"
+    echo "Amount to transfer (1 = 1eGld. Input floating point numbers as 0.01):"
     read AMOUNT
 
-    transferEgld $RECIPIENT $AMOUNT
+    proposeTransferExecute $RECIPIENT $AMOUNT
 }
 
 option2() {
@@ -41,29 +43,46 @@ option2() {
     echo "Amount to transfer (1 = 1ECITY. Input floating numbers as 0.01):"
     read AMOUNT
 
-    transferEsdt $RECIPIENT $TOKEN $AMOUNT
+    proposeTransferExecuteEsdt $ADDRESS 0 "ESDTTransfer" $TOKEN $AMOUNT
 }
 
 option3() {
+    echo "Exercise caution when changing the quorum. Changing it to a value higher than the number of board members will lock the contract."
     echo "New quorum:"
     read QUORUM
 
-    changeQuorum $QUORUM
+    proposeChangeQuorum $QUORUM
 }
 
 option4() {
     echo "New member's address:"
     read MEMBER
 
-    addBoardMember $MEMBER
+    proposeAddBoardMember $MEMBER
 }
 
 option5() {
+    echo "New proposer's address:"
+    read PROPOSER
+
+    proposeAddProposer $PROPOSER
+}
+
+option6() {
     echo "Proposal ID:"
     read ID
 
     sign $ID
 }
+
+option7() {
+    echo "Proposal ID:"
+    read ID
+
+    unsign $ID
+}
+
+#TODO: keep going
 
 option6() {
     echo "Querying the blockchain..."

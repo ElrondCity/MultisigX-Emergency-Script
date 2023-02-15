@@ -4,8 +4,10 @@ OWNER="erd1...xxx"
 # Place your keystore file in the same directory as this script and replace the following with the name of the file
 # Optionally, you can also put your password in the .passfile in the same directory as this script (if not, you will be prompted for the password)
 PRIVATE_KEY=(--keyfile=erd1...xxx.json --passfile=.passfile)
-PROXY=https://devnet-api.elrond.com
+PROXY=https://devnet-api.elrond.com # Remove devnet prefix for mainnet
 CHAIN_ID=D
+
+# The following functions have been generated automatically. You can use them as is, or use the provided useVault.sh script for easier interaction with the contract.
 
 # Standard deploy command. Provide any constructor arguments as needed (e.g deploy 12 TOKEN-123456). Numbers are automatically scaled to 18 decimals. (e.g. 12 -> 12000000000000000000)
 deploy() {
