@@ -21,8 +21,8 @@ echo "4 - Propose adding a board member"
 echo "5 - Propose adding a proposer"
 echo "6 - Sign proposal"
 echo "7 - Unsign proposal"
-echo "7 - Display contract info"
-echo "8 - Display proposal info"
+echo "8 - Display contract info"
+echo "9 - Display proposal info"
 
 read INPUT
 
@@ -118,5 +118,5 @@ case $INPUT in
 "5") option5 ;;
 "6") option6 ;;
 "7") option7 ;;
-*) echo "Fuck you" ;;
+*) echo "Not a valid option" ;;
 esac
