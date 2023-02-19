@@ -21,8 +21,9 @@ echo "4 - Propose adding a board member"
 echo "5 - Propose adding a proposer"
 echo "6 - Sign proposal"
 echo "7 - Unsign proposal"
-echo "8 - Display contract info"
-echo "9 - Display proposal info"
+echo "8 - Execute TX"
+echo "9 - Display contract info"
+echo "10 - Display proposal info"
 
 read INPUT
 
@@ -82,32 +83,38 @@ option7() {
     unsign $ID
 }
 
-#TODO: keep going
+option8() {
+    echo "Proposal ID:"
+    read ID
 
-option6() {
+    performAction $ID
+}
+
+option9() {
     echo "Querying the blockchain..."
     echo "$bold Quorum: $normal"
     getQuorum
-    echo "$bold Transactions: $normal"
-    getTransactions
+    echo "$bold Last action's ID: $normal"
+    getActionLastIndex
+    echo "$bold Pending action full info: $normal"
+    getPendingActionFullInfo
+    echo "$bold All Board members: $normal"
+    getPendingActionFullInfo
 }
 
-option7() {
+# TODO
+
+option10() {
     echo "Proposal ID:"
     read ID
 
     echo "Querying the blockchain..."
-    echo "$bold Proposal type: $normal"
-    proposalType $ID
-    echo "$bold Proposal destination (use erdpy to decode address): $normal"
-    proposalDestination $ID
-    echo "$bold Proposal value: $normal"
-    proposalValue $ID
-    echo "$bold Proposal token: $normal"
-    proposalToken $ID
-
-
-
+    echo "$bold Quorum: $normal"
+    getQuorum
+    echo "$bold Is Quorum reached? $normal"
+    quorumReached $ID
+    echo "$bold How many signers? $normal"
+    getActionValidSignerCount $ID
 }
 
 case $INPUT in
@@ -118,5 +125,8 @@ case $INPUT in
 "5") option5 ;;
 "6") option6 ;;
 "7") option7 ;;
+"8") option8 ;;
+"9") option9 ;;
+"10") option10 ;;
 *) echo "Not a valid option" ;;
 esac
