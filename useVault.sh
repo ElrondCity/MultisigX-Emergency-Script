@@ -44,7 +44,17 @@ option2() {
     echo "Amount to transfer (1 = 1ECITY. Input floating numbers as 0.01):"
     read AMOUNT
 
-    proposeTransferExecuteEsdt $ADDRESS 0 "ESDTTransfer" $TOKEN $AMOUNT
+    TOKEN=$(echo -n $TOKEN | xxd -p -u | tr -d '\n')
+    AMOUNT=$(echo "scale=0; (${AMOUNT}*10^18)/1" | bc -l)
+    AMOUNT=$(printf "%016x" $AMOUNT)
+    ESDTT="ESDTTransfer"
+    ESDTT=$(echo -n $ESDTT | xxd -p -u | tr -d '\n')
+
+    BECH32RECIPIENT=$(erdpy wallet bech32 --decode $RECIPIENT)
+    DATA="proposeAsyncCall@${BECH32RECIPIENT}@@${ESDTT}@${TOKEN}@${AMOUNT}"
+    
+    erdpy tx new --receiver $ADDRESS --data $DATA \
+        --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --value 0 --send
 }
 
 option3() {
