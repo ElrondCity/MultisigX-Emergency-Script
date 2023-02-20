@@ -1,4 +1,6 @@
-# Fill in the variables in interaction.sh and run the script
+!#/bin/bash
+
+# Fill in the variables in interaction.sh and run this script
 bold=$(tput bold)
 normal=$(tput sgr0)
 
@@ -21,9 +23,10 @@ echo "4 - Propose adding a board member"
 echo "5 - Propose adding a proposer"
 echo "6 - Sign proposal"
 echo "7 - Unsign proposal"
-echo "8 - Execute TX"
-echo "9 - Display contract info"
-echo "10 - Display proposal info"
+echo "8 - Execute proposal"
+echo "9 - Discard proposal"
+echo "10 - Display contract info"
+echo "11 - Display proposal info"
 
 read INPUT
 
@@ -58,7 +61,7 @@ option2() {
 }
 
 option3() {
-    echo "Exercise caution when changing the quorum. Changing it to a value higher than the number of board members will lock the contract."
+    echo "Exercise caution when changing the quorum. Changing it to a value higher than the number of board members with access to their keys will lock the contract."
     echo "New quorum:"
     read QUORUM
 
@@ -101,6 +104,21 @@ option8() {
 }
 
 option9() {
+    echo "Proposal ID:"
+    read ID
+
+    NB_SIGNERS=$(getActionValidSignerCount $ID)
+    NB_SIGNERS=$(echo "$NB_SIGNERS" | jq '.[0].number')
+
+    if [ $NB_SIGNERS -gt 0 ]; then
+        echo "This proposal has already been signed by $NB_SIGNERS board member(s). All signatures need to be removed before discarding the proposal."
+        exit 1
+    fi
+
+    discardAction $ID
+}
+
+option10() {
     echo "Querying the blockchain..."
 
     echo "$bold Quorum: $normal"
@@ -126,19 +144,21 @@ option9() {
 
 # TODO
 
-option10() {
+option11() {
     echo "Proposal ID:"
     read ID
 
     echo "Querying the blockchain..."
+    
     echo "$bold Quorum: $normal"
     QUORUM=$(getQuorum)
     QUORUM_NUMBER=$(echo "$QUORUM" | jq '.[0].number')
     echo "$QUORUM_NUMBER"
-    echo "$bold Is Quorum reached? $normal"
-    quorumReached $ID
+
     echo "$bold How many signers? $normal"
-    getActionValidSignerCount $ID
+    NB_SIGNERS=$(getActionValidSignerCount $ID)
+    NB_SIGNERS=$(echo "$NB_SIGNERS" | jq '.[0].number')
+    echo "$NB_SIGNERS"
 }
 
 case $INPUT in
@@ -152,5 +172,6 @@ case $INPUT in
 "8") option8 ;;
 "9") option9 ;;
 "10") option10 ;;
+"11") option11 ;;
 *) echo "Not a valid option" ;;
 esac
