@@ -102,14 +102,26 @@ option8() {
 
 option9() {
     echo "Querying the blockchain..."
+
     echo "$bold Quorum: $normal"
-    getQuorum
+    QUORUM=$(getQuorum)
+    QUORUM_NUMBER=$(echo "$QUORUM" | jq '.[0].number')
+    echo "$QUORUM_NUMBER"
+
     echo "$bold Last action's ID: $normal"
-    getActionLastIndex
-    echo "$bold Pending action full info: $normal"
-    getPendingActionFullInfo
+    ID=$(getActionLastIndex)
+    ID_NUMBER=$(echo "$ID" | jq '.[0].number')
+    echo "$ID_NUMBER"
+
+    #echo "$bold Pending action full info: $normal"
+    #getPendingActionFullInfo
+
     echo "$bold All Board members: $normal"
-    getPendingActionFullInfo
+    BOARD_MEMBERS=$(getAllBoardMembers)
+    HEX_VALUES=($(echo "$BOARD_MEMBERS" | jq -r '.[].hex'))
+    for hex_value in "${HEX_VALUES[@]}"; do
+        erdpy wallet bech32 --encode "$hex_value"
+    done
 }
 
 # TODO
@@ -120,7 +132,9 @@ option10() {
 
     echo "Querying the blockchain..."
     echo "$bold Quorum: $normal"
-    getQuorum
+    QUORUM=$(getQuorum)
+    QUORUM_NUMBER=$(echo "$QUORUM" | jq '.[0].number')
+    echo "$QUORUM_NUMBER"
     echo "$bold Is Quorum reached? $normal"
     quorumReached $ID
     echo "$bold How many signers? $normal"
