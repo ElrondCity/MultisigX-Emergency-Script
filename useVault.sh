@@ -1,4 +1,4 @@
-!#/bin/bash
+#!/bin/bash
 
 # Fill in the variables in interaction.sh and run this script
 bold=$(tput bold)
@@ -149,7 +149,7 @@ option11() {
     read ID
 
     echo "Querying the blockchain..."
-    
+
     echo "$bold Quorum: $normal"
     QUORUM=$(getQuorum)
     QUORUM_NUMBER=$(echo "$QUORUM" | jq '.[0].number')
