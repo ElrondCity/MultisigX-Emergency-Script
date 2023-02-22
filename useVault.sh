@@ -18,15 +18,16 @@ echo "Vault address: $bold $ADDRESS $normal"
 echo "What do you want to do?"
 echo "1 - Propose eGld transfer"
 echo "2 - Propose ESDT transfer"
-echo "3 - Propose quorum change"
-echo "4 - Propose adding a board member"
-echo "5 - Propose adding a proposer"
-echo "6 - Sign proposal"
-echo "7 - Unsign proposal"
-echo "8 - Execute proposal"
-echo "9 - Discard proposal"
-echo "10 - Display contract info"
-echo "11 - Display proposal info"
+echo "3 - Propose NFT/SFT transfer"
+echo "4 - Propose quorum change"
+echo "5 - Propose adding a board member"
+echo "6 - Propose adding a proposer"
+echo "7 - Sign proposal"
+echo "8 - Unsign proposal"
+echo "9 - Execute proposal"
+echo "10 - Discard proposal"
+echo "11 - Display contract info"
+echo "12 - Display proposal info"
 
 read INPUT
 
@@ -49,11 +50,18 @@ option2() {
 
     TOKEN=$(echo -n $TOKEN | xxd -p -u | tr -d '\n')
     AMOUNT=$(echo "scale=0; (${AMOUNT}*10^18)/1" | bc -l)
-    AMOUNT=$(printf "%016x" $AMOUNT)
+    AMOUNT=$(printf "%x" $AMOUNT)
+
+    # Add a zero in front of the amount if its length is odd
+    if [ $((${#AMOUNT} % 2)) -eq 1 ]; then
+        AMOUNT="0${AMOUNT}"
+    fi
+
     ESDTT="ESDTTransfer"
     ESDTT=$(echo -n $ESDTT | xxd -p -u | tr -d '\n')
 
     BECH32RECIPIENT=$(erdpy wallet bech32 --decode $RECIPIENT)
+
     DATA="proposeAsyncCall@${BECH32RECIPIENT}@@${ESDTT}@${TOKEN}@${AMOUNT}"
     
     erdpy tx new --receiver $ADDRESS --data $DATA \
@@ -61,6 +69,38 @@ option2() {
 }
 
 option3() {
+    echo "Recipient address:"
+    read RECIPIENT
+    echo "Token id:"
+    read TOKEN
+    echo "Nonce:"
+    read NONCE
+    echo "Amount to transfer:"
+    read AMOUNT
+
+    TOKEN=$(echo -n $TOKEN | xxd -p -u | tr -d '\n')
+    AMOUNT=$(printf "%x" $AMOUNT)
+    if [ $((${#AMOUNT} % 2)) -eq 1 ]; then
+        AMOUNT="0${AMOUNT}"
+    fi
+
+    NONCE=$(printf "%x" $NONCE)
+    if [ $((${#NONCE} % 2)) -eq 1 ]; then
+        NONCE="0${NONCE}"
+    fi
+
+    ESDTT="ESDTNFTTransfer"
+    ESDTT=$(echo -n $ESDTT | xxd -p -u | tr -d '\n')
+
+    BECH32RECIPIENT=$(erdpy wallet bech32 --decode $RECIPIENT)
+    BECH32ADDRESS=$(erdpy wallet bech32 --decode $ADDRESS)
+    DATA="proposeAsyncCall@${BECH32ADDRESS}@@${ESDTT}@${TOKEN}@${NONCE}@${AMOUNT}@${BECH32RECIPIENT}"
+    
+    erdpy tx new --receiver $ADDRESS --data $DATA \
+        --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --value 0 --send
+}
+
+option4() {
     echo "Exercise caution when changing the quorum. Changing it to a value higher than the number of board members with access to their keys will lock the contract."
     echo "New quorum:"
     read QUORUM
@@ -68,42 +108,42 @@ option3() {
     proposeChangeQuorum $QUORUM
 }
 
-option4() {
+option5() {
     echo "New member's address:"
     read MEMBER
 
     proposeAddBoardMember $MEMBER
 }
 
-option5() {
+option6() {
     echo "New proposer's address:"
     read PROPOSER
 
     proposeAddProposer $PROPOSER
 }
 
-option6() {
+option7() {
     echo "Proposal ID:"
     read ID
 
     sign $ID
 }
 
-option7() {
+option8() {
     echo "Proposal ID:"
     read ID
 
     unsign $ID
 }
 
-option8() {
+option9() {
     echo "Proposal ID:"
     read ID
 
     performAction $ID
 }
 
-option9() {
+option10() {
     echo "Proposal ID:"
     read ID
 
@@ -118,7 +158,7 @@ option9() {
     discardAction $ID
 }
 
-option10() {
+option11() {
     echo "Querying the blockchain..."
 
     echo "$bold Quorum: $normal"
@@ -142,9 +182,7 @@ option10() {
     done
 }
 
-# TODO
-
-option11() {
+option12() {
     echo "Proposal ID:"
     read ID
 
@@ -173,5 +211,6 @@ case $INPUT in
 "9") option9 ;;
 "10") option10 ;;
 "11") option11 ;;
+"12") option12 ;;
 *) echo "Not a valid option" ;;
 esac
